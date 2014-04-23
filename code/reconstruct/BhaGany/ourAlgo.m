@@ -20,3 +20,7 @@ Am = computeAdjMat(D);
 %convert node values to binary
 %loop through binary matrix and add values to adjacency matrix.
 %second threshold to retain only the highly probable links.
+
+weight = sum(sum(Am))
+probA = Am/weight
+return probA
