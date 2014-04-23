@@ -32,7 +32,7 @@ submissionDirectory = [challengeFolder 'results']; % Where ready-to-submit resul
 modelDirectory = [challengeFolder 'models'];       % Where trained predictive models end up
 networkIdNames = {'mockvalid', 'mocktest'};        % IMPORTANT: these are the base names of your data files in the data directory
 %networkIdNames = {'iNet1_Size100_CC01inh', 'iNet1_Size100_CC02inh', 'iNet1_Size100_CC03inh', 'iNet1_Size100_CC04inh', 'iNet1_Size100_CC05inh', 'iNet1_Size100_CC06inh'};
-scoringMethods = {@randomScore, @computeGTE, @ourAlgo}; % Other methods include: @computeIGGini, @computeIGEntropy, @computeCrossCorrelation, @computeGranger, @trainedPredictor};     
+scoringMethods = {@randomScore, @ourAlgo}; % Other methods include: @computeIGGini, @computeIGEntropy, @computeCrossCorrelation, @computeGranger, @trainedPredictor};     
                                  % Use:
                                  % 1) @randomScore to rapidly generate random results.
                                  % 2) @computeGTE to generate the baseline result with the GTE method to detect causality in time series. 
@@ -66,7 +66,6 @@ scores=cell(netNum,metNum);
     
 %% Loop over all methods you want to try
 for j=1:metNum
-    
     scoringMethod = scoringMethods{j};
     scoreFile = [submissionDirectory filesep func2str(scoringMethod) '_' sprintf('%s_', networkIdNames{:}) the_date];
     
@@ -75,6 +74,7 @@ for j=1:metNum
 
         networkId = networkIdNames{i};
         fprintf('*** %s on %s ***\n\n', func2str(scoringMethod), networkId);
+		fflush(stdout)
 
         %% Load the Fluorescence signal
         fluorescenceFile = [dataDirectory filesep 'fluorescence_' networkId extension];
@@ -88,6 +88,8 @@ for j=1:metNum
         else
             arg = false;
         end
+		fflush(stdout)
+
         scores{i,j} = scoringMethod(F, arg);
         % Note: these scoring methods do not make use of available neuron
         % positions (in their 2-D layout simulating neuron cultures).
@@ -97,12 +99,16 @@ for j=1:metNum
         resuFile = [submissionDirectory filesep func2str(scoringMethod) '_' networkId '_' the_date];
         if ~concatenateScores, scoreFile = resuFile; end
         fprintf('Writing %s\n', scoreFile);
+		fflush(stdout)
+
         writeNetworkScoresInCSV(scoreFile, scores{i,j}, networkId);
 
         %% If we have the network architecture... compute/plot the ROC curve:
         % (network architecture provided only for training data to the participants)
         networkFile = [dataDirectory filesep 'network_' networkId extension];
         fprintf('Computing ROC with using network %s\n', networkFile);
+		fflush(stdout)
+
         if exist(networkFile,'file')
             network = readNetworkScores(networkFile);
             h = figure('Name', [func2str(scoringMethod) ' ' networkId ' ROC curve']);

@@ -1,25 +1,25 @@
-function score = ourAlgo(F, arg)
+function score = ourAlgo(F, varargin)
 
-disp("F = ");
-%disp(F);
+%%% Assign default values
+params.fast=1;
+params.debug=0;
+params = parse_pv_pairs(params,varargin); 
 
-disp("arg = ");
-disp(arg);
+[D, G] = discretizeFluorescenceSignal(F, 'debug', params.debug, 'conditioningLevel', 0.25, 'bins', [-10,0.12,10]);
 
-if nargin<3,
-    debug_ = false; 
-end
+%disp("D  = ");
+%disp(size(D));
+newD = D - 1; %we need to do this since it seems to be discretized as 1, 2 instead of 0 - 1
 
-[D, G] = discretizeFluorescenceSignal(F, 'debug', debug_, 'conditioningLevel', 0.25, 'bins', [-10,0.12,10]);
-
-disp("D  = ");
-disp(size(D));
-
-Am = computeAdjMat(D);
+if(params.fast)
+	Am = computeAdjMatFast(newD);
+else
+	Am = computeAdjMat(newD);
+endif
 
 %convert node values to binary
 %loop through binary matrix and add values to adjacency matrix.
 %second threshold to retain only the highly probable links.
 
-weight = sum(sum(Am))
-score = Am/weight
+weight = sum(sum(Am));
+score = Am/weight;
