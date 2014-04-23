@@ -22,5 +22,4 @@ Am = computeAdjMat(D);
 %second threshold to retain only the highly probable links.
 
 weight = sum(sum(Am))
-probA = Am/weight
-return probA
+score = Am/weight
